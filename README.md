@@ -19,3 +19,7 @@ This is just the beginning—I plan to expand features gradually with community 
 | Internal Detection | *In Progress*   | Detects injected DLLs, hooks, etc.   |  
 
 **Contribute:** Found a bug? Want to help? Open an [Issue](https://github.com/bbugdigger/BanHammer/issues) or submit a PR!  
+
+#### Inspirations/Links/Knowledge/Resources Used
+
+- https://github.com/mq1n/NoMercy
