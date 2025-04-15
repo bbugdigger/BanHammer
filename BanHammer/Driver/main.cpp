@@ -4,6 +4,7 @@
 
 #include "Blocklist/blocklist.h"
 #include "HandleStrip/handlestrip.h"
+#include "ThreadInjection/threadinjection.h"
 
 void BanHammerUnload(PDRIVER_OBJECT driverObject);
 NTSTATUS BanHammerCreateClose(PDEVICE_OBJECT, PIRP Irp);
@@ -57,6 +58,12 @@ extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING reg
     if (!NT_SUCCESS(status)) {
         BANHAMMER_COMMON_DBG_BREAK();
         BANHAMMER_LOG_ERROR("handle strip init failed (0x%08X)\n", status);
+    }
+    
+    status = InitThreadInjectionPrevention();
+    if (!NT_SUCCESS(status)) {
+        BANHAMMER_COMMON_DBG_BREAK();
+        BANHAMMER_LOG_ERROR("thread injeciton init failed (0x%08X)\n", status);
     }
 
     driverObject->DriverUnload = BanHammerUnload;

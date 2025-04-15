@@ -55,7 +55,7 @@ NTSTATUS InitHandleStrip() {
 	NTSTATUS status = ObRegisterCallbacks(&Registration, &g_HandleStripRegistrationHandle);
 	if (!NT_SUCCESS(status)) {
 		BANHAMMER_COMMON_DBG_BREAK();
-		BANHAMMER_LOG_ERROR("Failed to register callbacks (status=%08X)\n", status);
+		BANHAMMER_LOG_ERROR("Failed to register handle strip callbacks (status=%08X)\n", status);
 		return status;
 	}
 
