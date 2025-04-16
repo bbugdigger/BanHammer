@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>f9670561-a98e-41d5-aa6b-8cead521a8ce</ProjectGuid>
+    <ProjectGuid>{D59F7487-8398-D47A-449B-5D462CE5E701}</ProjectGuid>
     <TemplateGuid>{dd38f7fc-d7bd-488b-9242-7d8754cde80d}</TemplateGuid>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
@@ -87,10 +87,22 @@
     </DriverSign>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Inf Include="Driver.inf" />
+    <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
-    <FilesToPackage Include="$(TargetPath)" />
+    <ClCompile Include="Blocklist\blocklist.cpp" />
+    <ClCompile Include="HandleStrip\handlestrip.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="ThreadInjection\threadinjection.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BanHammerCommon.h" />
+    <ClInclude Include="Blocklist\blocklist.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="HandleStrip\handlestrip.h" />
+    <ClInclude Include="log.h" />
+    <ClInclude Include="ThreadInjection\threadinjection.h" />
+    <ClInclude Include="Undefined.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

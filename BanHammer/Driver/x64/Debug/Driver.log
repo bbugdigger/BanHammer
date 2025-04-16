@@ -1,0 +1,12 @@
+﻿main.obj : error LNK2005: "char const * const g_Game" (?g_Game@@3PEBDEB) already defined in handlestrip.obj
+main.obj : error LNK2005: "unsigned short const * * blocklist" (?blocklist@@3PAPEBGA) already defined in blocklist.obj
+main.obj : error LNK2005: "void * g_HandleStripRegistrationHandle" (?g_HandleStripRegistrationHandle@@3PEAXEA) already defined in handlestrip.obj
+threadinjection.obj : error LNK2005: "void * g_ThreadInjectionRegistrationHandle" (?g_ThreadInjectionRegistrationHandle@@3PEAXEA) already defined in main.obj
+threadinjection.obj : error LNK2005: "char const * const g_Game" (?g_Game@@3PEBDEB) already defined in handlestrip.obj
+blocklist.obj : error LNK2019: unresolved external symbol LogpPrint referenced in function "long __cdecl IsProcRunning(unsigned short const *)" (?IsProcRunning@@YAJPEBG@Z)
+handlestrip.obj : error LNK2001: unresolved external symbol LogpPrint
+main.obj : error LNK2001: unresolved external symbol LogpPrint
+threadinjection.obj : error LNK2001: unresolved external symbol LogpPrint
+main.obj : error LNK2019: unresolved external symbol LogInitialization referenced in function DriverEntry
+main.obj : error LNK2019: unresolved external symbol LogRegisterReinitialization referenced in function DriverEntry
+C:\Users\dognu\BanHammer\BanHammer\x64\Debug\Driver.sys : fatal error LNK1120: 3 unresolved externals

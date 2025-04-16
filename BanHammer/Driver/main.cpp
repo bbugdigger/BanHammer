@@ -69,6 +69,8 @@ extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING reg
     driverObject->DriverUnload = BanHammerUnload;
     driverObject->MajorFunction[IRP_MJ_CREATE] = driverObject->MajorFunction[IRP_MJ_CLOSE] = BanHammerCreateClose;
     driverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = BanHammerDeviceControl;
+
+    return status;
 }
 
 void BanHammerUnload(PDRIVER_OBJECT driverObject) {
@@ -87,12 +89,13 @@ NTSTATUS BanHammerCreateClose(PDEVICE_OBJECT, PIRP Irp) {
 NTSTATUS BanHammerDeviceControl(PDEVICE_OBJECT, PIRP Irp) {
     auto stack = IoGetCurrentIrpStackLocation(Irp);
     auto status = STATUS_SUCCESS;
-    auto len = 0;
-
+    
     switch (stack->Parameters.DeviceIoControl.IoControlCode) {
         case IOCTL_BLOCKLIST:
         {
             BlockList();
         }
     }
+
+    return status;
 }

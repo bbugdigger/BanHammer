@@ -2,7 +2,7 @@
 
 #include "../BanHammerCommon.h"
 
-OB_PREOP_CALLBACK_STATUS OnPreThreadHandle(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION Info)
+OB_PREOP_CALLBACK_STATUS OnPreThreadHandle(PVOID /*RegistrationContext*/, POB_PRE_OPERATION_INFORMATION Info)
 {
 	if (Info->KernelHandle)
 		return OB_PREOP_SUCCESS;
