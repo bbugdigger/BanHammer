@@ -6,21 +6,22 @@
 #include "HandleStrip/handlestrip.h"
 #include "ThreadInjection/threadinjection.h"
 
-void BanHammerUnload(PDRIVER_OBJECT driverObject);
-NTSTATUS BanHammerCreateClose(PDEVICE_OBJECT, PIRP Irp);
-NTSTATUS BanHammerDeviceControl(PDEVICE_OBJECT, PIRP Irp);
+void BanHammerUnload(PDRIVER_OBJECT DriverObject);
+NTSTATUS BanHammerCreate(PDEVICE_OBJECT DeviceObject, PIRP Irp);
+NTSTATUS BanHammerClose(PDEVICE_OBJECT DeviceObject, PIRP Irp);
+NTSTATUS BanHammerDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp);
 
-extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING registry_path) {
-    UNREFERENCED_PARAMETER(registry_path);
-
-    NTSTATUS status = STATUS_UNSUCCESSFUL;
+extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
+    UNREFERENCED_PARAMETER(RegistryPath);
+    PAGED_CODE()
 
     static const wchar_t kLogFilePath[] = L"\\SystemRoot\\BanHammer.log";
-    static const auto kLogLevel =
-        (IsReleaseBuild()) ? kLogPutLevelInfo | kLogOptDisableFunctionName
-                            : kLogPutLevelDebug | kLogOptDisableFunctionName;
+    static const auto kLogLevel = (IsReleaseBuild()) ? kLogPutLevelInfo | kLogOptDisableFunctionName
+                                                    : kLogPutLevelDebug | kLogOptDisableFunctionName;
 
     BANHAMMER_COMMON_DBG_BREAK();
+
+    NTSTATUS status = STATUS_UNSUCCESSFUL;
 
     // Initialize log functions
     bool need_reinitialization = false;
@@ -34,14 +35,13 @@ extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING reg
 
     // Register re-initialization for the log functions if needed
     if (need_reinitialization) {
-        LogRegisterReinitialization(driverObject);
+        LogRegisterReinitialization(DriverObject);
     }
 
     PDEVICE_OBJECT deviceObject = nullptr;
     UNICODE_STRING symLink = RTL_CONSTANT_STRING(L"\\??\\BanHammer");
-
     UNICODE_STRING devName = RTL_CONSTANT_STRING(L"\\Device\\BanHammer");
-    status = IoCreateDevice(driverObject, 0, &devName, FILE_DEVICE_UNKNOWN, 0, TRUE, &deviceObject);
+    status = IoCreateDevice(DriverObject, 0, &devName, FILE_DEVICE_UNKNOWN, 0, TRUE, &deviceObject);
     if (!NT_SUCCESS(status)) {
         BANHAMMER_COMMON_DBG_BREAK();
         BANHAMMER_LOG_ERROR("failed to create device (0x%08X)\n", status);
@@ -66,9 +66,10 @@ extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING reg
         BANHAMMER_LOG_ERROR("thread injeciton init failed (0x%08X)\n", status);
     }
 
-    driverObject->DriverUnload = BanHammerUnload;
-    driverObject->MajorFunction[IRP_MJ_CREATE] = driverObject->MajorFunction[IRP_MJ_CLOSE] = BanHammerCreateClose;
-    driverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = BanHammerDeviceControl;
+    DriverObject->DriverUnload = BanHammerUnload;
+    DriverObject->MajorFunction[IRP_MJ_CREATE] = BanHammerCreate;
+    DriverObject->MajorFunction[IRP_MJ_CLOSE] = BanHammerClose;
+    DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = BanHammerDeviceControl;
 
     return status;
 }
@@ -79,7 +80,14 @@ void BanHammerUnload(PDRIVER_OBJECT driverObject) {
     IoDeleteDevice(driverObject->DeviceObject);
 }
 
-NTSTATUS BanHammerCreateClose(PDEVICE_OBJECT, PIRP Irp) {
+NTSTATUS BanHammerCreate(PDEVICE_OBJECT, PIRP Irp) {
+    Irp->IoStatus.Status = STATUS_SUCCESS;
+    Irp->IoStatus.Information = 0;
+    IoCompleteRequest(Irp, 0);
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS BanHammerClose(PDEVICE_OBJECT, PIRP Irp) {
     Irp->IoStatus.Status = STATUS_SUCCESS;
     Irp->IoStatus.Information = 0;
     IoCompleteRequest(Irp, 0);
@@ -87,6 +95,8 @@ NTSTATUS BanHammerCreateClose(PDEVICE_OBJECT, PIRP Irp) {
 }
 
 NTSTATUS BanHammerDeviceControl(PDEVICE_OBJECT, PIRP Irp) {
+    PAGED_CODE();
+
     auto stack = IoGetCurrentIrpStackLocation(Irp);
     auto status = STATUS_SUCCESS;
     
