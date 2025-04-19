@@ -27,6 +27,9 @@
     <ClInclude Include="dig_sig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="integrity_check.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

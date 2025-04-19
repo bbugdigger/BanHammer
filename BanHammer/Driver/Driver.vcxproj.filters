@@ -54,5 +54,8 @@
     <ClInclude Include="ThreadInjection\threadinjection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="traces.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
