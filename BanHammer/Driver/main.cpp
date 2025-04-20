@@ -1,7 +1,3 @@
-#include "common.h"
-#include "log.h"
-#include "BanHammerCommon.h"
-
 #include "Blocklist/blocklist.h"
 
 #include "Callbacks/callbacks.h"

@@ -29,3 +29,11 @@ typedef struct _DRIVER_LIST_HEAD {
     volatile BOOLEAN deferred_complete;
     volatile LONG    can_hash_x86;
 } DRIVER_LIST_HEAD, * PDRIVER_LIST_HEAD;
+
+PVOID g_RemoteThreadInjectionRegistrationHandle;
+OB_PREOP_CALLBACK_STATUS OnPreThreadHandle(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION Info);
+NTSTATUS InitRemoteThreadInjectionPrevention();
+
+PVOID g_HandleStripRegistrationHandle;
+OB_PREOP_CALLBACK_STATUS OnPreOpenProcessHandle(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION Info);
+NTSTATUS InitHandleStrip();

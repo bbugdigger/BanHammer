@@ -1,6 +1,18 @@
 #pragma once
 
+const char* g_Game = "cs2.exe";
+
+#define IOCTL_BLOCKLIST	CTL_CODE(0x8000, 0x800, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
 #include "log.h"
+
+#define PROCESS_TERMINATE			0x0001
+#define PROCESS_VM_READ				0x0010
+#define PROCESS_VM_WRITE			0x0020
+#define PROCESS_QUERY_INFORMATION 	0x0400
+#define PROCESS_VM_OPERATION  		0x0008
+#define PROCESS_CREATE_THREAD		0x0002
+#define PROCESS_SUSPEND_RESUME 		0x0800
 
 #define SYSTEM_MODULES_POOL            'halb'
 #define POOL_TAG_DRIVER_LIST           'drvl'
@@ -41,3 +53,7 @@ typedef struct _RTL_MODULE_EXTENDED_INFO {
     USHORT FileNameOffset;
     CHAR   FullPathName[0x100];
 } RTL_MODULE_EXTENDED_INFO, * PRTL_MODULE_EXTENDED_INFO;
+
+extern "C" {
+    LPCSTR NTAPI PsGetProcessImageFileName(PEPROCESS Process);
+}
