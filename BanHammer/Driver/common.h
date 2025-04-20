@@ -1,6 +1,9 @@
 #pragma once
 
-#include <ntddk.h>
+#include "log.h"
+
+#define SYSTEM_MODULES_POOL            'halb'
+#define POOL_TAG_DRIVER_LIST           'drvl'
 
 /// Sets a break point that works only when a debugger is present
 #if !defined(BANHAMMER_COMMON_DBG_BREAK)
@@ -31,3 +34,10 @@ constexpr bool IsReleaseBuild() {
     return true;
 #endif
 }
+
+typedef struct _RTL_MODULE_EXTENDED_INFO {
+    PVOID  ImageBase;
+    ULONG  ImageSize;
+    USHORT FileNameOffset;
+    CHAR   FullPathName[0x100];
+} RTL_MODULE_EXTENDED_INFO, * PRTL_MODULE_EXTENDED_INFO;

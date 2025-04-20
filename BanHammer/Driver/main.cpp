@@ -3,13 +3,15 @@
 #include "BanHammerCommon.h"
 
 #include "Blocklist/blocklist.h"
-#include "HandleStrip/handlestrip.h"
-#include "ThreadInjection/threadinjection.h"
+
+#include "Callbacks/callbacks.h"
 
 void BanHammerUnload(PDRIVER_OBJECT DriverObject);
 NTSTATUS BanHammerCreate(PDEVICE_OBJECT DeviceObject, PIRP Irp);
 NTSTATUS BanHammerClose(PDEVICE_OBJECT DeviceObject, PIRP Irp);
 NTSTATUS BanHammerDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp);
+
+NTSTATUS NotifyRoutines();
 
 extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
     UNREFERENCED_PARAMETER(RegistryPath);
@@ -54,16 +56,10 @@ extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING Reg
         BANHAMMER_LOG_ERROR("failed to create sym link (0x%08X)\n", status);
     }
 
-    status = InitHandleStrip();
+    status = NotifyRoutines();
     if (!NT_SUCCESS(status)) {
         BANHAMMER_COMMON_DBG_BREAK();
-        BANHAMMER_LOG_ERROR("handle strip init failed (0x%08X)\n", status);
-    }
-    
-    status = InitThreadInjectionPrevention();
-    if (!NT_SUCCESS(status)) {
-        BANHAMMER_COMMON_DBG_BREAK();
-        BANHAMMER_LOG_ERROR("thread injeciton init failed (0x%08X)\n", status);
+        BANHAMMER_LOG_ERROR("failed to setup NotifyRoutines (0x%08X)\n", status);
     }
 
     DriverObject->DriverUnload = BanHammerUnload;
@@ -107,5 +103,23 @@ NTSTATUS BanHammerDeviceControl(PDEVICE_OBJECT, PIRP Irp) {
         }
     }
 
+    return status;
+}
+
+NTSTATUS NotifyRoutines() {
+    PAGED_CODE();
+
+    NTSTATUS status = STATUS_UNSUCCESSFUL;
+
+    BANHAMMER_LOG_INFO("Enabling driver wide callback and notify routines.");
+
+    status = PsSetLoadImageNotifyRoutine(ImageLoadNotifyRoutineCallback);
+
+    if (!NT_SUCCESS(status)) {
+        BANHAMMER_LOG_ERROR("PsSetLoadImageNotifyRoutine failed with status %x", status);
+        return status;
+    }
+
+    BANHAMMER_LOG_INFO("Successfully enabled driver wide callback and notify routines.");
     return status;
 }
