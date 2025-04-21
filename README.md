@@ -15,9 +15,14 @@ The rise of cheating in the gaming industry is hurting both players and develope
   - Checkout legit processes with overlays who have potential to be abused (Discord, Dwm, Steam, Teamspeak, NVIDIA GeForce Experience, AMD Adrenalin, Razer Cortex?, Overwolf, Game Bar, OBS)
     - looking for changed overlay flags
     - looking for IAT hooks or regular hooks
-- **Internal cheat detection** (DLL injection, hooks)  
+  - Blacklisted process check by digital signature
+- **Internal cheat detection**
+  - Scan for non signed dll
+  - Integrity check for provided module and section
+  - New thread creation via TLS callbacks
+  - IAT hook check
 
-This is just the beginning—I plan to expand features gradually with community support. If you're a developer, contributor, or just passionate about fair play, let’s work together to make gaming cheat-free!  
+This is just the beginning — I plan to expand features gradually with community support. If you're a developer, contributor, or just passionate about fair play, let’s work together!  
 
 ---
 
@@ -30,18 +35,23 @@ This is just the beginning—I plan to expand features gradually with community 
   - Check for patches of some kernel drivers
   - Hypervisor and vm detection
   - Detection of test signing
-  - Look for more driver traces: MmUnloadedDrivers, KernelHashBucketList, PoolBigPageTable, ExpCovUnloadedDrivers, Object directory?, pool tag scanning
+  - Look for more driver traces: MmUnloadedDrivers, KernelHashBucketList, PoolBigPageTable, ExpCovUnloadedDrivers, Object directory?
+  - pool tag (to identify driver objects?) and system thread scanning, the ones that do not belong to drivers that are in PsLoadedModuleList must be from manually mapped drivers!
+  - `.data` pointer hook checks. See if a particular pointer that we are using is pointing to a memory region outside valid (signed) modules.
+    - blacklist some pointers?
 
 - **Aditional Security Thoughts**
   - use lazy import library
   - rtti obfuscation
-  - 
+  - make string encryption library for kenrel and usermode
+  - runtime pointer/function encryption/decryption
 
 ---
 
 **Contribute:** Found a bug? Want to help? Open an [Issue](https://github.com/bbugdigger/BanHammer/issues) or submit a PR!  
 
-#### Inspirations/Links/Knowledge/Resources Used
+#### Inspirations/Links/Knowledge/Resources
 
 - https://github.com/mq1n/NoMercy
-- 
+- https://github.com/AlSch092/UltimateAntiCheat
+- https://github.com/donnaskiez/ac
