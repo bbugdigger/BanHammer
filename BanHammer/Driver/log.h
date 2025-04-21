@@ -118,7 +118,7 @@ extern "C" {
     /// STATUS_SUCCESS from DriverEntry() if LogInitialization() returned
     /// STATUS_REINITIALIZATION_NEEDED. If this function is called, DriverEntry()
     /// must return STATUS_SUCCESS.
-    _IRQL_requires_max_(PASSIVE_LEVEL) void LogRegisterReinitialization(_In_ PDRIVER_OBJECT driver_object);
+    _IRQL_requires_max_(PASSIVE_LEVEL) void LogRegisterReinitialization(_In_ PDRIVER_OBJECT DriverObject);
 
     /// Terminates the log system. Should be called from an IRP_MJ_SHUTDOWN handler.
     _IRQL_requires_max_(PASSIVE_LEVEL) void LogIrpShutdownHandler();

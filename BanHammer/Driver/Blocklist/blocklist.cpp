@@ -40,7 +40,7 @@ NTSTATUS IsProcRunning(const wchar_t* processName) {
 
     PSYSTEM_PROCESS_INFORMATION processInfo = (PSYSTEM_PROCESS_INFORMATION)buffer;
     while (processInfo->NextEntryOffset != 0) {
-        if (processInfo->ImageName.Buffer != NULL && _wcsicmp(processInfo->ImageName.Buffer, processName) == 0) {
+        if (processInfo->Name.Buffer != NULL && _wcsicmp(processInfo->Name.Buffer, processName) == 0) {
             status = STATUS_SUCCESS;
             break;
         }

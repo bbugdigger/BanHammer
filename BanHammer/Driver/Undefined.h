@@ -306,7 +306,7 @@ typedef struct _SYSTEM_PROCESS_INFORMATION
     LARGE_INTEGER CreateTime;
     LARGE_INTEGER UserTime;
     LARGE_INTEGER KernelTime;
-    UNICODE_STRING ImageName;
+    UNICODE_STRING Name;
     KPRIORITY BasePriority;
     HANDLE UniqueProcessId;
     HANDLE InheritedFromUniqueProcessId;

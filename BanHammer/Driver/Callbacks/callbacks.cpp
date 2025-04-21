@@ -1,79 +1,5 @@
 #include "callbacks.h"
 
-NTSTATUS InitialiseDriverList() {
-    PAGED_CODE();
-
-    NTSTATUS status = STATUS_UNSUCCESSFUL;
-    SYSTEM_MODULES modules = { 0 };
-    PDRIVER_LIST_ENTRY entry = NULL;
-    PRTL_MODULE_EXTENDED_INFO module_entry = NULL;
-    PDRIVER_LIST_HEAD head = GetDriverList();
-
-    InterlockedExchange(&head->active, TRUE);
-    InitializeListHead(&head->list_entry);
-    InitializeListHead(&head->deferred_list);
-    KeInitializeGuardedMutex(&head->lock);
-
-    head->can_hash_x86 = FALSE;
-    head->work_item = IoAllocateWorkItem(GetDriverDeviceObject());
-
-    if (!head->work_item)
-        return STATUS_INSUFFICIENT_RESOURCES;
-
-    status = GetSystemModuleInformation(&modules);
-
-    if (!NT_SUCCESS(status)) {
-        BANHAMMER_LOG_ERROR("GetSystemModuleInformation failed with status %x", status);
-        return status;
-    }
-
-    KeAcquireGuardedMutex(&head->lock);
-
-    /* skip hal.dll and ntoskrnl.exe */
-    for (UINT32 index = 2; index < modules.module_count; index++) {
-        entry = ExAllocatePool2(
-            POOL_FLAG_NON_PAGED,
-            sizeof(DRIVER_LIST_ENTRY),
-            POOL_TAG_DRIVER_LIST);
-
-        if (!entry)
-            continue;
-
-        module_entry = &((PRTL_MODULE_EXTENDED_INFO)modules.address)[index];
-
-        entry->IsHashed = TRUE;
-        entry->ImageBase = module_entry->ImageBase;
-        entry->ImageSize = module_entry->ImageSize;
-
-        IntCopyMemory(entry->FullImagePath, module_entry->FullPathName, sizeof(module_entry->FullPathName));
-
-        status = HashModule(module_entry, entry->Hash);
-
-        if (status == STATUS_INVALID_IMAGE_WIN_32) {
-            BANHAMMER_LOG_ERROR(
-                "32 bit module not hashed, will hash later. %x",
-                status);
-            entry->IsHashed = FALSE;
-            entry->IsX86 = TRUE;
-            InsertHeadList(&head->deferred_list, &entry->deferred_entry);
-        }
-        else if (!NT_SUCCESS(status)) {
-            BANHAMMER_LOG_ERROR("HashModule failed with status %x", status);
-            entry->IsHashed = FALSE;
-        }
-
-        InsertHeadList(&head->list_entry, &entry->ListEntry);
-    }
-
-    KeReleaseGuardedMutex(&head->lock);
-    head->active = TRUE;
-
-    if (modules.address)
-        ExFreePoolWithTag(modules.address, SYSTEM_MODULES_POOL);
-
-    return STATUS_SUCCESS;
-}
-
 VOID FindDriverEntryByBaseAddress(PVOID ImageBase, PDRIVER_LIST_ENTRY* Entry) {
     NT_ASSERT(ImageBase != NULL);
     NT_ASSERT(Entry != NULL);
@@ -82,7 +8,7 @@ VOID FindDriverEntryByBaseAddress(PVOID ImageBase, PDRIVER_LIST_ENTRY* Entry) {
     PLIST_ENTRY entry = NULL;
     PDRIVER_LIST_ENTRY driver = NULL;
 
-    KeAcquireGuardedMutex(&head->lock);
+    KeAcquireGuardedMutex(&head->Mutex);
     entry = head->list_entry.Flink;
 
     while (entry != &head->list_entry) {
@@ -94,7 +20,7 @@ VOID FindDriverEntryByBaseAddress(PVOID ImageBase, PDRIVER_LIST_ENTRY* Entry) {
         entry = entry->Flink;
     }
 
-    KeReleaseGuardedMutex(&head->lock);
+    KeReleaseGuardedMutex(&head->Mutex);
 }
 
 VOID ImageLoadNotifyRoutineCallback(PUNICODE_STRING FullImageName, HANDLE ProcessId, PIMAGE_INFO ImageInfo) {
@@ -109,40 +35,10 @@ VOID ImageLoadNotifyRoutineCallback(PUNICODE_STRING FullImageName, HANDLE Proces
 
     FindDriverEntryByBaseAddress(ImageInfo->ImageBase, &entry);
 
-    /* if we image exists, exit */
     if (entry)
         return;
 
-    entry = ExAllocatePool2(
-        POOL_FLAG_NON_PAGED,
-        sizeof(DRIVER_LIST_ENTRY),
-        POOL_TAG_DRIVER_LIST);
-
-    if (!entry)
-        return;
-
-    entry->IsHashed = TRUE;
-    entry->IsX86 = FALSE;
-    entry->ImageBase = ImageInfo->ImageBase;
-    entry->ImageSize = ImageInfo->ImageSize;
-
-    BANHAMMER_LOG_INFO("New system image ansi: %ls", entry->FullImagePath->Buffer);
-
-    status = HashModule(&module, &entry->Hash);
-
-    if (status == STATUS_INVALID_IMAGE_WIN_32) {
-        BANHAMMER_LOG_ERROR("32 bit module not hashed, will hash later. %x", status);
-        entry->IsX86 = TRUE;
-        entry->IsHashed = FALSE;
-    }
-    else if (!NT_SUCCESS(status)) {
-        BANHAMMER_LOG_ERROR("HashModule failed with status %x", status);
-        entry->IsHashed = FALSE;
-    }
-
-    KeAcquireGuardedMutex(&head->lock);
-    InsertHeadList(&head->list_entry, &entry->ListEntry);
-    KeReleaseGuardedMutex(&head->lock);
+    //TODO: Finish integrity checking for kernel modules
 }
 
 OB_PREOP_CALLBACK_STATUS OnPreThreadHandle(PVOID /*RegistrationContext*/, POB_PRE_OPERATION_INFORMATION Info) {
@@ -154,7 +50,7 @@ OB_PREOP_CALLBACK_STATUS OnPreThreadHandle(PVOID /*RegistrationContext*/, POB_PR
     LPCSTR TargetName = PsGetProcessImageFileName(TargetProcess);
     LPCSTR CallerName = PsGetProcessImageFileName(CallerProcess);
 
-    if (_stricmp(TargetName, g_Game)) {
+    if (_stricmp(TargetName, GetModuleInformation()->Name)) {
         Info->Parameters->CreateHandleInformation.DesiredAccess &= ~(
             PROCESS_CREATE_THREAD |
             PROCESS_SUSPEND_RESUME |
@@ -209,7 +105,7 @@ OB_PREOP_CALLBACK_STATUS OnPreOpenProcessHandle(PVOID, POB_PRE_OPERATION_INFORMA
 
     auto process = (PEPROCESS)Info->Object; //A pointer to the process or thread object that is the target of the handle operation
     LPCSTR processName = PsGetProcessImageFileName(process);
-    if (_stricmp(processName, g_Game)) {
+    if (_stricmp(processName, GetModuleInformation()->Name)) {
 
         PEPROCESS CallerProcess = PsGetCurrentProcess();
         LPCSTR callerName = PsGetProcessImageFileName(CallerProcess);
@@ -257,5 +153,57 @@ NTSTATUS InitHandleStrip() {
         return status;
     }
 
+    return STATUS_SUCCESS;
+}
+
+static VOID TimerObjectWorkItemRoutine(PDEVICE_OBJECT DeviceObject, PVOID Context) {
+    NTSTATUS status = STATUS_UNSUCCESSFUL;
+    PTIMER_OBJECT timer = (PTIMER_OBJECT)Context;
+    PDRIVER_LIST_HEAD list = GetDriverList();
+    
+    UNREFERENCED_PARAMETER(DeviceObject);
+
+    if (!ARGUMENT_PRESENT(Context))
+        return;
+    
+
+}
+
+static void TimerObjectCallbackRoutine(PKDPC Dpc, PVOID DeferredContext, PVOID SystemArgument1, PVOID SystemArgument2) {
+    UNREFERENCED_PARAMETER(Dpc);
+    UNREFERENCED_PARAMETER(SystemArgument1);
+    UNREFERENCED_PARAMETER(SystemArgument2);
+    NT_ASSERT(DeferredContext != NULL);
+
+    if (!ARGUMENT_PRESENT(DeferredContext))
+        return;
+
+    PTIMER_OBJECT timer = (PTIMER_OBJECT)DeferredContext;
+
+    /* we dont want to queue our work item if it hasnt executed */
+    if (timer->State)
+        return;
+
+    InterlockedExchange(&timer->State, TRUE);
+    IoQueueWorkItem(
+        timer->WorkItem,
+        TimerObjectWorkItemRoutine,
+        BackgroundWorkQueue,
+        timer);
+}
+
+NTSTATUS InitTimerObject(PTIMER_OBJECT Timer) {
+    LARGE_INTEGER dueTime = { .QuadPart = -ABSOLUTE(SECONDS(5)) };
+
+    Timer->WorkItem = IoAllocateWorkItem(GetDriverDeviceObject());
+
+    if (!Timer->WorkItem)
+        return STATUS_MEMORY_NOT_ALLOCATED;
+
+    KeInitializeDpc(&Timer->Dpc, TimerObjectCallbackRoutine, Timer);
+    KeInitializeTimer(&Timer->Timer);
+    KeSetTimerEx(&Timer->Timer, dueTime, REPEAT_TIME_10_SEC, &Timer->Dpc);
+
+    BANHAMMER_LOG_DEBUG("Successfully initialised global timer callback.");
     return STATUS_SUCCESS;
 }
