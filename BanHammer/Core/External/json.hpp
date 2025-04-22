@@ -2912,7 +2912,7 @@ namespace detail
         const auto l_index = static_cast<std::size_t>(lhs);
         const auto r_index = static_cast<std::size_t>(rhs);
 #if JSON_HAS_THREE_WAY_COMPARISON
-        if (l_index < order.size() && r_index < order.size())
+        if (l_index < order.Size() && r_index < order.Size())
         {
             return order[l_index] <=> order[r_index]; // *NOPAD*
         }
@@ -2974,8 +2974,8 @@ namespace detail
         JSON_ASSERT(!f.empty());
         for (auto pos = s.find(f);                // find first occurrence of f
             pos != StringType::npos;          // make sure f was found
-            s.replace(pos, f.size(), t),      // replace with t, and
-            pos = s.find(f, pos + t.size()))  // find next occurrence of f
+            s.replace(pos, f.Size(), t),      // replace with t, and
+            pos = s.find(f, pos + t.Size()))  // find next occurrence of f
         {
         }
     }
@@ -4273,7 +4273,7 @@ namespace detail
     template<typename StringType, typename... Args>
     inline std::size_t concat_length(const StringType& str, const Args& ... rest)
     {
-        return str.size() + concat_length(rest...);
+        return str.Size() + concat_length(rest...);
     }
 
     template<typename OutStringType>
@@ -4300,7 +4300,7 @@ namespace detail
     using detect_string_can_append_iter = is_detected<string_can_append_iter, StringType, Arg>;
 
     template<typename StringType, typename Arg>
-    using string_can_append_data = decltype(std::declval<StringType&>().append(std::declval<const Arg&>().data(), std::declval<const Arg&>().size()));
+    using string_can_append_data = decltype(std::declval<StringType&>().append(std::declval<const Arg&>().data(), std::declval<const Arg&>().Size()));
 
     template<typename StringType, typename Arg>
     using detect_string_can_append_data = is_detected<string_can_append_data, StringType, Arg>;
@@ -4357,7 +4357,7 @@ namespace detail
         && detect_string_can_append_data<OutStringType, Arg>::value, int > >
     inline void concat_into(OutStringType& out, const Arg& arg, Args&& ... rest)
     {
-        out.append(arg.data(), arg.size());
+        out.append(arg.data(), arg.Size());
         concat_into(out, std::forward<Args>(rest)...);
     }
 
@@ -4817,7 +4817,7 @@ namespace detail
         {
             JSON_THROW(type_error::create(302, concat("type must be array, but is ", j.type_name()), &j));
         }
-        l.resize(j.size());
+        l.resize(j.Size());
         std::transform(j.begin(), j.end(), std::begin(l),
             [](const BasicJsonType& elem)
             {
@@ -4865,7 +4865,7 @@ namespace detail
         using std::end;
 
         ConstructibleArrayType ret;
-        ret.reserve(j.size());
+        ret.reserve(j.Size());
         std::transform(j.begin(), j.end(),
             std::inserter(ret, end(ret)), [](const BasicJsonType& i)
             {
@@ -5103,7 +5103,7 @@ namespace detail
 
 #if JSON_HAS_FILESYSTEM || JSON_HAS_EXPERIMENTAL_FILESYSTEM
     template<typename BasicJsonType>
-    inline void from_json(const BasicJsonType& j, std_fs::path& p)
+    inline void from_json(const BasicJsonType& j, std_fs::FullPath& p)
     {
         if (JSON_HEDLEY_UNLIKELY(!j.is_string()))
         {
@@ -5590,7 +5590,7 @@ namespace detail
             j.m_data.m_value.destroy(j.m_data.m_type);
             j.m_data.m_type = value_t::array;
             j.m_data.m_value = value_t::array;
-            j.m_data.m_value.array->reserve(arr.size());
+            j.m_data.m_value.array->reserve(arr.Size());
             for (const bool x : arr)
             {
                 j.m_data.m_value.array->push_back(x);
@@ -5606,8 +5606,8 @@ namespace detail
             j.m_data.m_value.destroy(j.m_data.m_type);
             j.m_data.m_type = value_t::array;
             j.m_data.m_value = value_t::array;
-            j.m_data.m_value.array->resize(arr.size());
-            if (arr.size() > 0)
+            j.m_data.m_value.array->resize(arr.Size());
+            if (arr.Size() > 0)
             {
                 std::copy(std::begin(arr), std::end(arr), j.m_data.m_value.array->begin());
             }
@@ -5812,7 +5812,7 @@ namespace detail
 
 #if JSON_HAS_FILESYSTEM || JSON_HAS_EXPERIMENTAL_FILESYSTEM
     template<typename BasicJsonType>
-    inline void to_json(BasicJsonType& j, const std_fs::path& p)
+    inline void to_json(BasicJsonType& j, const std_fs::FullPath& p)
     {
         j = p.string();
     }
@@ -6064,7 +6064,7 @@ namespace detail
 
         case BasicJsonType::value_t::object:
         {
-            auto seed = combine(type, j.size());
+            auto seed = combine(type, j.Size());
             for (const auto& element : j.items())
             {
                 const auto h = std::hash<string_t>{}(element.key());
@@ -6076,7 +6076,7 @@ namespace detail
 
         case BasicJsonType::value_t::array:
         {
-            auto seed = combine(type, j.size());
+            auto seed = combine(type, j.Size());
             for (const auto& element : j)
             {
                 seed = combine(seed, hash(element));
@@ -6116,7 +6116,7 @@ namespace detail
 
         case BasicJsonType::value_t::binary:
         {
-            auto seed = combine(type, j.get_binary().size());
+            auto seed = combine(type, j.get_binary().Size());
             const auto h = std::hash<bool>{}(j.get_binary().has_subtype());
             seed = combine(seed, h);
             seed = combine(seed, static_cast<std::size_t>(j.get_binary().subtype()));
@@ -7083,7 +7083,7 @@ namespace detail
         bool start_object(std::size_t len)
         {
             // check callback for object start
-            const bool keep = callback(static_cast<int>(ref_stack.size()), parse_event_t::object_start, discarded);
+            const bool keep = callback(static_cast<int>(ref_stack.Size()), parse_event_t::object_start, discarded);
             keep_stack.push_back(keep);
 
             auto val = handle_value(BasicJsonType::value_t::object, true);
@@ -7103,7 +7103,7 @@ namespace detail
             BasicJsonType k = BasicJsonType(val);
 
             // check callback for key
-            const bool keep = callback(static_cast<int>(ref_stack.size()), parse_event_t::key, k);
+            const bool keep = callback(static_cast<int>(ref_stack.Size()), parse_event_t::key, k);
             key_keep_stack.push_back(keep);
 
             // add discarded value at given key and store the reference for later
@@ -7119,7 +7119,7 @@ namespace detail
         {
             if (ref_stack.back())
             {
-                if (!callback(static_cast<int>(ref_stack.size()) - 1, parse_event_t::object_end, *ref_stack.back()))
+                if (!callback(static_cast<int>(ref_stack.Size()) - 1, parse_event_t::object_end, *ref_stack.back()))
                 {
                     // discard object
                     *ref_stack.back() = discarded;
@@ -7153,7 +7153,7 @@ namespace detail
 
         bool start_array(std::size_t len)
         {
-            const bool keep = callback(static_cast<int>(ref_stack.size()), parse_event_t::array_start, discarded);
+            const bool keep = callback(static_cast<int>(ref_stack.Size()), parse_event_t::array_start, discarded);
             keep_stack.push_back(keep);
 
             auto val = handle_value(BasicJsonType::value_t::array, true);
@@ -7174,7 +7174,7 @@ namespace detail
 
             if (ref_stack.back())
             {
-                keep = callback(static_cast<int>(ref_stack.size()) - 1, parse_event_t::array_end, *ref_stack.back());
+                keep = callback(static_cast<int>(ref_stack.Size()) - 1, parse_event_t::array_end, *ref_stack.back());
                 if (keep)
                 {
                     ref_stack.back()->set_parents();
@@ -7250,7 +7250,7 @@ namespace detail
             auto value = BasicJsonType(std::forward<Value>(v));
 
             // check callback
-            const bool keep = skip_callback || callback(static_cast<int>(ref_stack.size()), parse_event_t::value, value);
+            const bool keep = skip_callback || callback(static_cast<int>(ref_stack.Size()), parse_event_t::value, value);
 
             // do not handle this value if we just learnt it shall be discarded
             if (!keep)
@@ -7622,7 +7622,7 @@ namespace detail
         */
         bool next_byte_in_range(std::initializer_list<char_int_type> ranges)
         {
-            JSON_ASSERT(ranges.size() == 2 || ranges.size() == 4 || ranges.size() == 6);
+            JSON_ASSERT(ranges.Size() == 2 || ranges.Size() == 4 || ranges.Size() == 6);
             add(current);
 
             for (auto range = ranges.begin(); range != ranges.end(); ++range)
@@ -8659,7 +8659,7 @@ namespace detail
                 const auto x = std::strtoull(token_buffer.data(), &endptr, 10);
 
                 // we checked the number format before
-                JSON_ASSERT(endptr == token_buffer.data() + token_buffer.size());
+                JSON_ASSERT(endptr == token_buffer.data() + token_buffer.Size());
 
                 if (errno == 0)
                 {
@@ -8675,7 +8675,7 @@ namespace detail
                 const auto x = std::strtoll(token_buffer.data(), &endptr, 10);
 
                 // we checked the number format before
-                JSON_ASSERT(endptr == token_buffer.data() + token_buffer.size());
+                JSON_ASSERT(endptr == token_buffer.data() + token_buffer.Size());
 
                 if (errno == 0)
                 {
@@ -8692,7 +8692,7 @@ namespace detail
             strtof(value_float, token_buffer.data(), &endptr);
 
             // we checked the number format before
-            JSON_ASSERT(endptr == token_buffer.data() + token_buffer.size());
+            JSON_ASSERT(endptr == token_buffer.data() + token_buffer.Size());
 
             return token_type::value_float;
         }
@@ -8861,7 +8861,7 @@ namespace detail
                 {
                     // escape control characters
                     std::array<char, 9> cs{ {} };
-                    static_cast<void>((std::snprintf)(cs.data(), cs.size(), "<U+%.4X>", static_cast<unsigned char>(c))); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
+                    static_cast<void>((std::snprintf)(cs.data(), cs.Size(), "<U+%.4X>", static_cast<unsigned char>(c))); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
                     result += cs.data();
                 }
                 else
@@ -8955,17 +8955,17 @@ namespace detail
             case 't':
             {
                 std::array<char_type, 4> true_literal = { {static_cast<char_type>('t'), static_cast<char_type>('r'), static_cast<char_type>('u'), static_cast<char_type>('e')} };
-                return scan_literal(true_literal.data(), true_literal.size(), token_type::literal_true);
+                return scan_literal(true_literal.data(), true_literal.Size(), token_type::literal_true);
             }
             case 'f':
             {
                 std::array<char_type, 5> false_literal = { {static_cast<char_type>('f'), static_cast<char_type>('a'), static_cast<char_type>('l'), static_cast<char_type>('s'), static_cast<char_type>('e')} };
-                return scan_literal(false_literal.data(), false_literal.size(), token_type::literal_false);
+                return scan_literal(false_literal.data(), false_literal.Size(), token_type::literal_false);
             }
             case 'n':
             {
                 std::array<char_type, 4> null_literal = { {static_cast<char_type>('n'), static_cast<char_type>('u'), static_cast<char_type>('l'), static_cast<char_type>('l')} };
-                return scan_literal(null_literal.data(), null_literal.size(), token_type::literal_null);
+                return scan_literal(null_literal.data(), null_literal.Size(), token_type::literal_null);
             }
 
             // string
@@ -9506,7 +9506,7 @@ namespace detail
             default: // anything else not supported (yet)
             {
                 std::array<char, 3> cr{ {} };
-                static_cast<void>((std::snprintf)(cr.data(), cr.size(), "%.2hhX", static_cast<unsigned char>(element_type))); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
+                static_cast<void>((std::snprintf)(cr.data(), cr.Size(), "%.2hhX", static_cast<unsigned char>(element_type))); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
                 const std::string cr_str{ cr.data() };
                 return sax->parse_error(element_type_parse_position, cr_str,
                     parse_error::create(114, element_type_parse_position, concat("Unsupported BSON record type 0x", cr_str), nullptr));
@@ -11337,9 +11337,9 @@ namespace detail
                 {
                     return false;
                 }
-                if (dim.size() == 1 || (dim.size() == 2 && dim.at(0) == 1)) // return normal array size if 1D row vector
+                if (dim.Size() == 1 || (dim.Size() == 2 && dim.at(0) == 1)) // return normal array size if 1D row vector
                 {
-                    result = dim.at(dim.size() - 1);
+                    result = dim.at(dim.Size() - 1);
                     return true;
                 }
                 if (!dim.empty())  // if ndarray, convert to an object in JData annotated array format
@@ -11354,7 +11354,7 @@ namespace detail
                     }
 
                     string_t key = "_ArraySize_";
-                    if (JSON_HEDLEY_UNLIKELY(!sax->start_object(3) || !sax->key(key) || !sax->start_array(dim.size())))
+                    if (JSON_HEDLEY_UNLIKELY(!sax->start_object(3) || !sax->key(key) || !sax->start_array(dim.Size())))
                     {
                         return false;
                     }
@@ -11850,9 +11850,9 @@ namespace detail
         bool get_ubjson_high_precision_number()
         {
             // get size of following number string
-            std::size_t size{};
+            std::size_t Size{};
             bool no_ndarray = true;
-            auto res = get_ubjson_size_value(size, no_ndarray);
+            auto res = get_ubjson_size_value(Size, no_ndarray);
             if (JSON_HEDLEY_UNLIKELY(!res))
             {
                 return res;
@@ -11860,7 +11860,7 @@ namespace detail
 
             // get number string
             std::vector<char> number_vector;
-            for (std::size_t i = 0; i < size; ++i)
+            for (std::size_t i = 0; i < Size; ++i)
             {
                 get();
                 if (JSON_HEDLEY_UNLIKELY(!unexpect_eof(input_format, "number")))
@@ -12077,7 +12077,7 @@ namespace detail
         std::string get_token_string() const
         {
             std::array<char, 3> cr{ {} };
-            static_cast<void>((std::snprintf)(cr.data(), cr.size(), "%.2hhX", static_cast<unsigned char>(current))); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
+            static_cast<void>((std::snprintf)(cr.data(), cr.Size(), "%.2hhX", static_cast<unsigned char>(current))); // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
             return std::string{ cr.data() };
         }
 
@@ -14057,13 +14057,13 @@ private:
         using size_type = typename BasicJsonType::size_type;
 
         // error condition (cf. RFC 6901, Sect. 4)
-        if (JSON_HEDLEY_UNLIKELY(s.size() > 1 && s[0] == '0'))
+        if (JSON_HEDLEY_UNLIKELY(s.Size() > 1 && s[0] == '0'))
         {
             JSON_THROW(detail::parse_error::create(106, 0, detail::concat("array index '", s, "' must not begin with '0'"), nullptr));
         }
 
         // error condition (cf. RFC 6901, Sect. 4)
-        if (JSON_HEDLEY_UNLIKELY(s.size() > 1 && !(s[0] >= '1' && s[0] <= '9')))
+        if (JSON_HEDLEY_UNLIKELY(s.Size() > 1 && !(s[0] >= '1' && s[0] <= '9')))
         {
             JSON_THROW(detail::parse_error::create(109, 0, detail::concat("array index '", s, "' is not a number"), nullptr));
         }
@@ -14074,7 +14074,7 @@ private:
         const unsigned long long res = std::strtoull(p, &p_end, 10); // NOLINT(runtime/int)
         if (p == p_end // invalid input or empty string
             || errno == ERANGE // out of range
-            || JSON_HEDLEY_UNLIKELY(static_cast<std::size_t>(p_end - p) != s.size())) // incomplete read
+            || JSON_HEDLEY_UNLIKELY(static_cast<std::size_t>(p_end - p) != s.Size())) // incomplete read
         {
             JSON_THROW(detail::out_of_range::create(404, detail::concat("unresolved reference token '", s, "'"), nullptr));
         }
@@ -14227,7 +14227,7 @@ private:
                 if (reference_token == "-")
                 {
                     // explicitly treat "-" as index beyond the end
-                    ptr = &ptr->operator[](ptr->m_data.m_value.array->size());
+                    ptr = &ptr->operator[](ptr->m_data.m_value.array->Size());
                 }
                 else
                 {
@@ -14279,7 +14279,7 @@ private:
                 {
                     // "-" always fails the range check
                     JSON_THROW(detail::out_of_range::create(402, detail::concat(
-                        "array index '-' (", std::to_string(ptr->m_data.m_value.array->size()),
+                        "array index '-' (", std::to_string(ptr->m_data.m_value.array->Size()),
                         ") is out of range"), ptr));
                 }
 
@@ -14336,7 +14336,7 @@ private:
                 if (JSON_HEDLEY_UNLIKELY(reference_token == "-"))
                 {
                     // "-" cannot be used for const access
-                    JSON_THROW(detail::out_of_range::create(402, detail::concat("array index '-' (", std::to_string(ptr->m_data.m_value.array->size()), ") is out of range"), ptr));
+                    JSON_THROW(detail::out_of_range::create(402, detail::concat("array index '-' (", std::to_string(ptr->m_data.m_value.array->Size()), ") is out of range"), ptr));
                 }
 
                 // use unchecked array access
@@ -14386,7 +14386,7 @@ private:
                 {
                     // "-" always fails the range check
                     JSON_THROW(detail::out_of_range::create(402, detail::concat(
-                        "array index '-' (", std::to_string(ptr->m_data.m_value.array->size()),
+                        "array index '-' (", std::to_string(ptr->m_data.m_value.array->Size()),
                         ") is out of range"), ptr));
                 }
 
@@ -14441,19 +14441,19 @@ private:
                     // "-" always fails the range check
                     return false;
                 }
-                if (JSON_HEDLEY_UNLIKELY(reference_token.size() == 1 && !("0" <= reference_token && reference_token <= "9")))
+                if (JSON_HEDLEY_UNLIKELY(reference_token.Size() == 1 && !("0" <= reference_token && reference_token <= "9")))
                 {
                     // invalid char
                     return false;
                 }
-                if (JSON_HEDLEY_UNLIKELY(reference_token.size() > 1))
+                if (JSON_HEDLEY_UNLIKELY(reference_token.Size() > 1))
                 {
                     if (JSON_HEDLEY_UNLIKELY(!('1' <= reference_token[0] && reference_token[0] <= '9')))
                     {
                         // first char should be between '1' and '9'
                         return false;
                     }
-                    for (std::size_t i = 1; i < reference_token.size(); i++)
+                    for (std::size_t i = 1; i < reference_token.Size(); i++)
                     {
                         if (JSON_HEDLEY_UNLIKELY(!('0' <= reference_token[i] && reference_token[i] <= '9')))
                         {
@@ -14464,7 +14464,7 @@ private:
                 }
 
                 const auto idx = array_index<BasicJsonType>(reference_token);
-                if (idx >= ptr->size())
+                if (idx >= ptr->Size())
                 {
                     // index out of range
                     return false;
@@ -14548,7 +14548,7 @@ private:
                 JSON_ASSERT(reference_token[pos] == '~');
 
                 // ~ must be followed by 0 or 1
-                if (JSON_HEDLEY_UNLIKELY(pos == reference_token.size() - 1 ||
+                if (JSON_HEDLEY_UNLIKELY(pos == reference_token.Size() - 1 ||
                     (reference_token[pos + 1] != '0' &&
                         reference_token[pos + 1] != '1')))
                 {
@@ -14589,7 +14589,7 @@ private:
             else
             {
                 // iterate array and use index as reference string
-                for (std::size_t i = 0; i < value.m_data.m_value.array->size(); ++i)
+                for (std::size_t i = 0; i < value.m_data.m_value.array->Size(); ++i)
                 {
                     flatten(detail::concat(reference_string, '/', std::to_string(i)),
                         value.m_data.m_value.array->operator[](i), result);
@@ -15309,7 +15309,7 @@ namespace detail
             case value_t::string:
             {
                 // step 1: write control byte and the string length
-                const auto N = j.m_data.m_value.string->size();
+                const auto N = j.m_data.m_value.string->Size();
                 if (N <= 0x17)
                 {
                     write_number(static_cast<std::uint8_t>(0x60 + N));
@@ -15340,14 +15340,14 @@ namespace detail
                 // step 2: write the string
                 oa->write_characters(
                     reinterpret_cast<const CharType*>(j.m_data.m_value.string->c_str()),
-                    j.m_data.m_value.string->size());
+                    j.m_data.m_value.string->Size());
                 break;
             }
 
             case value_t::array:
             {
                 // step 1: write control byte and the array size
-                const auto N = j.m_data.m_value.array->size();
+                const auto N = j.m_data.m_value.array->Size();
                 if (N <= 0x17)
                 {
                     write_number(static_cast<std::uint8_t>(0x80 + N));
@@ -15410,7 +15410,7 @@ namespace detail
                 }
 
                 // step 1: write control byte and the binary array size
-                const auto N = j.m_data.m_value.binary->size();
+                const auto N = j.m_data.m_value.binary->Size();
                 if (N <= 0x17)
                 {
                     write_number(static_cast<std::uint8_t>(0x40 + N));
@@ -15449,7 +15449,7 @@ namespace detail
             case value_t::object:
             {
                 // step 1: write control byte and the object size
-                const auto N = j.m_data.m_value.object->size();
+                const auto N = j.m_data.m_value.object->Size();
                 if (N <= 0x17)
                 {
                     write_number(static_cast<std::uint8_t>(0xA0 + N));
@@ -15632,7 +15632,7 @@ namespace detail
             case value_t::string:
             {
                 // step 1: write control byte and the string length
-                const auto N = j.m_data.m_value.string->size();
+                const auto N = j.m_data.m_value.string->Size();
                 if (N <= 31)
                 {
                     // fixstr
@@ -15660,14 +15660,14 @@ namespace detail
                 // step 2: write the string
                 oa->write_characters(
                     reinterpret_cast<const CharType*>(j.m_data.m_value.string->c_str()),
-                    j.m_data.m_value.string->size());
+                    j.m_data.m_value.string->Size());
                 break;
             }
 
             case value_t::array:
             {
                 // step 1: write control byte and the array size
-                const auto N = j.m_data.m_value.array->size();
+                const auto N = j.m_data.m_value.array->Size();
                 if (N <= 15)
                 {
                     // fixarray
@@ -15701,7 +15701,7 @@ namespace detail
                 const bool use_ext = j.m_data.m_value.binary->has_subtype();
 
                 // step 1: write control byte and the byte string length
-                const auto N = j.m_data.m_value.binary->size();
+                const auto N = j.m_data.m_value.binary->Size();
                 if (N <= (std::numeric_limits<std::uint8_t>::max)())
                 {
                     std::uint8_t output_type{};
@@ -15780,7 +15780,7 @@ namespace detail
             case value_t::object:
             {
                 // step 1: write control byte and the object size
-                const auto N = j.m_data.m_value.object->size();
+                const auto N = j.m_data.m_value.object->Size();
                 if (N <= 15)
                 {
                     // fixmap
@@ -15871,10 +15871,10 @@ namespace detail
                 {
                     oa->write_character(to_char_type('S'));
                 }
-                write_number_with_ubjson_prefix(j.m_data.m_value.string->size(), true, use_bjdata);
+                write_number_with_ubjson_prefix(j.m_data.m_value.string->Size(), true, use_bjdata);
                 oa->write_characters(
                     reinterpret_cast<const CharType*>(j.m_data.m_value.string->c_str()),
-                    j.m_data.m_value.string->size());
+                    j.m_data.m_value.string->Size());
                 break;
             }
 
@@ -15909,7 +15909,7 @@ namespace detail
                 if (use_count)
                 {
                     oa->write_character(to_char_type('#'));
-                    write_number_with_ubjson_prefix(j.m_data.m_value.array->size(), true, use_bjdata);
+                    write_number_with_ubjson_prefix(j.m_data.m_value.array->Size(), true, use_bjdata);
                 }
 
                 for (const auto& el : *j.m_data.m_value.array)
@@ -15942,18 +15942,18 @@ namespace detail
                 if (use_count)
                 {
                     oa->write_character(to_char_type('#'));
-                    write_number_with_ubjson_prefix(j.m_data.m_value.binary->size(), true, use_bjdata);
+                    write_number_with_ubjson_prefix(j.m_data.m_value.binary->Size(), true, use_bjdata);
                 }
 
                 if (use_type)
                 {
                     oa->write_characters(
                         reinterpret_cast<const CharType*>(j.m_data.m_value.binary->data()),
-                        j.m_data.m_value.binary->size());
+                        j.m_data.m_value.binary->Size());
                 }
                 else
                 {
-                    for (size_t i = 0; i < j.m_data.m_value.binary->size(); ++i)
+                    for (size_t i = 0; i < j.m_data.m_value.binary->Size(); ++i)
                     {
                         oa->write_character(to_char_type('U'));
                         oa->write_character(j.m_data.m_value.binary->data()[i]);
@@ -15970,7 +15970,7 @@ namespace detail
 
             case value_t::object:
             {
-                if (use_bjdata && j.m_data.m_value.object->size() == 3 && j.m_data.m_value.object->find("_ArrayType_") != j.m_data.m_value.object->end() && j.m_data.m_value.object->find("_ArraySize_") != j.m_data.m_value.object->end() && j.m_data.m_value.object->find("_ArrayData_") != j.m_data.m_value.object->end())
+                if (use_bjdata && j.m_data.m_value.object->Size() == 3 && j.m_data.m_value.object->find("_ArrayType_") != j.m_data.m_value.object->end() && j.m_data.m_value.object->find("_ArraySize_") != j.m_data.m_value.object->end() && j.m_data.m_value.object->find("_ArrayData_") != j.m_data.m_value.object->end())
                 {
                     if (!write_bjdata_ndarray(*j.m_data.m_value.object, use_count, use_type))  // decode bjdata ndarray in the JData format (https://github.com/NeuroJSON/jdata)
                     {
@@ -16007,15 +16007,15 @@ namespace detail
                 if (use_count)
                 {
                     oa->write_character(to_char_type('#'));
-                    write_number_with_ubjson_prefix(j.m_data.m_value.object->size(), true, use_bjdata);
+                    write_number_with_ubjson_prefix(j.m_data.m_value.object->Size(), true, use_bjdata);
                 }
 
                 for (const auto& el : *j.m_data.m_value.object)
                 {
-                    write_number_with_ubjson_prefix(el.first.size(), true, use_bjdata);
+                    write_number_with_ubjson_prefix(el.first.Size(), true, use_bjdata);
                     oa->write_characters(
                         reinterpret_cast<const CharType*>(el.first.c_str()),
-                        el.first.size());
+                        el.first.Size());
                     write_ubjson(el.second, use_count, use_type, prefix_required, use_bjdata);
                 }
 
@@ -16051,7 +16051,7 @@ namespace detail
                 static_cast<void>(j);
             }
 
-            return /*id*/ 1ul + name.size() + /*zero-terminator*/1u;
+            return /*id*/ 1ul + name.Size() + /*zero-terminator*/1u;
         }
 
         /*!
@@ -16063,7 +16063,7 @@ namespace detail
             oa->write_character(to_char_type(element_type)); // boolean
             oa->write_characters(
                 reinterpret_cast<const CharType*>(name.c_str()),
-                name.size() + 1u);
+                name.Size() + 1u);
         }
 
         /*!
@@ -16091,7 +16091,7 @@ namespace detail
         */
         static std::size_t calc_bson_string_size(const string_t& value)
         {
-            return sizeof(std::int32_t) + value.size() + 1ul;
+            return sizeof(std::int32_t) + value.Size() + 1ul;
         }
 
         /*!
@@ -16102,10 +16102,10 @@ namespace detail
         {
             write_bson_entry_header(name, 0x02);
 
-            write_number<std::int32_t>(static_cast<std::int32_t>(value.size() + 1ul), true);
+            write_number<std::int32_t>(static_cast<std::int32_t>(value.Size() + 1ul), true);
             oa->write_characters(
                 reinterpret_cast<const CharType*>(value.c_str()),
-                value.size() + 1);
+                value.Size() + 1);
         }
 
         /*!
@@ -16206,7 +16206,7 @@ namespace detail
         */
         static std::size_t calc_bson_binary_size(const typename BasicJsonType::binary_t& value)
         {
-            return sizeof(std::int32_t) + value.size() + 1ul;
+            return sizeof(std::int32_t) + value.Size() + 1ul;
         }
 
         /*!
@@ -16236,10 +16236,10 @@ namespace detail
         {
             write_bson_entry_header(name, 0x05);
 
-            write_number<std::int32_t>(static_cast<std::int32_t>(value.size()), true);
+            write_number<std::int32_t>(static_cast<std::int32_t>(value.Size()), true);
             write_number(value.has_subtype() ? static_cast<std::uint8_t>(value.subtype()) : static_cast<std::uint8_t>(0x00));
 
-            oa->write_characters(reinterpret_cast<const CharType*>(value.data()), value.size());
+            oa->write_characters(reinterpret_cast<const CharType*>(value.data()), value.Size());
         }
 
         /*!
@@ -16493,8 +16493,8 @@ namespace detail
                 }
 
                 const auto number = BasicJsonType(n).dump();
-                write_number_with_ubjson_prefix(number.size(), true, use_bjdata);
-                for (std::size_t i = 0; i < number.size(); ++i)
+                write_number_with_ubjson_prefix(number.Size(), true, use_bjdata);
+                for (std::size_t i = 0; i < number.Size(); ++i)
                 {
                     oa->write_character(to_char_type(static_cast<std::uint8_t>(number[i])));
                 }
@@ -16574,8 +16574,8 @@ namespace detail
                 }
 
                 const auto number = BasicJsonType(n).dump();
-                write_number_with_ubjson_prefix(number.size(), true, use_bjdata);
-                for (std::size_t i = 0; i < number.size(); ++i)
+                write_number_with_ubjson_prefix(number.Size(), true, use_bjdata);
+                for (std::size_t i = 0; i < number.Size(); ++i)
                 {
                     oa->write_character(to_char_type(static_cast<std::uint8_t>(number[i])));
                 }
@@ -16722,7 +16722,7 @@ namespace detail
             }
 
             key = "_ArrayData_";
-            if (value.at(key).size() != len)
+            if (value.at(key).Size() != len)
             {
                 return true;
             }
@@ -17429,7 +17429,7 @@ namespace detail
 
             const int index = (-kCachedPowersMinDecExp + k + (kCachedPowersDecStep - 1)) / kCachedPowersDecStep;
             JSON_ASSERT(index >= 0);
-            JSON_ASSERT(static_cast<std::size_t>(index) < kCachedPowers.size());
+            JSON_ASSERT(static_cast<std::size_t>(index) < kCachedPowers.Size());
 
             const cached_power cached = kCachedPowers[static_cast<std::size_t>(index)];
             JSON_ASSERT(kAlpha <= cached.e + e + 64);
@@ -18181,14 +18181,14 @@ namespace detail
 
                     // variable to hold indentation for recursive calls
                     const auto new_indent = current_indent + indent_step;
-                    if (JSON_HEDLEY_UNLIKELY(indent_string.size() < new_indent))
+                    if (JSON_HEDLEY_UNLIKELY(indent_string.Size() < new_indent))
                     {
-                        indent_string.resize(indent_string.size() * 2, ' ');
+                        indent_string.resize(indent_string.Size() * 2, ' ');
                     }
 
                     // first n-1 elements
                     auto i = val.m_data.m_value.object->cbegin();
-                    for (std::size_t cnt = 0; cnt < val.m_data.m_value.object->size() - 1; ++cnt, ++i)
+                    for (std::size_t cnt = 0; cnt < val.m_data.m_value.object->Size() - 1; ++cnt, ++i)
                     {
                         o->write_characters(indent_string.c_str(), new_indent);
                         o->write_character('\"');
@@ -18217,7 +18217,7 @@ namespace detail
 
                     // first n-1 elements
                     auto i = val.m_data.m_value.object->cbegin();
-                    for (std::size_t cnt = 0; cnt < val.m_data.m_value.object->size() - 1; ++cnt, ++i)
+                    for (std::size_t cnt = 0; cnt < val.m_data.m_value.object->Size() - 1; ++cnt, ++i)
                     {
                         o->write_character('\"');
                         dump_escaped(i->first, ensure_ascii);
@@ -18254,9 +18254,9 @@ namespace detail
 
                     // variable to hold indentation for recursive calls
                     const auto new_indent = current_indent + indent_step;
-                    if (JSON_HEDLEY_UNLIKELY(indent_string.size() < new_indent))
+                    if (JSON_HEDLEY_UNLIKELY(indent_string.Size() < new_indent))
                     {
-                        indent_string.resize(indent_string.size() * 2, ' ');
+                        indent_string.resize(indent_string.Size() * 2, ' ');
                     }
 
                     // first n-1 elements
@@ -18315,9 +18315,9 @@ namespace detail
 
                     // variable to hold indentation for recursive calls
                     const auto new_indent = current_indent + indent_step;
-                    if (JSON_HEDLEY_UNLIKELY(indent_string.size() < new_indent))
+                    if (JSON_HEDLEY_UNLIKELY(indent_string.Size() < new_indent))
                     {
-                        indent_string.resize(indent_string.size() * 2, ' ');
+                        indent_string.resize(indent_string.Size() * 2, ' ');
                     }
 
                     o->write_characters(indent_string.c_str(), new_indent);
@@ -18446,18 +18446,18 @@ namespace detail
         void dump_escaped(const string_t& s, const bool ensure_ascii)
         {
             std::uint32_t codepoint{};
-            std::uint8_t state = UTF8_ACCEPT;
+            std::uint8_t State = UTF8_ACCEPT;
             std::size_t bytes = 0;  // number of bytes written to string_buffer
 
             // number of bytes written at the point of the last valid byte
             std::size_t bytes_after_last_accept = 0;
             std::size_t undumped_chars = 0;
 
-            for (std::size_t i = 0; i < s.size(); ++i)
+            for (std::size_t i = 0; i < s.Size(); ++i)
             {
                 const auto byte = static_cast<std::uint8_t>(s[i]);
 
-                switch (decode(state, codepoint, byte))
+                switch (decode(State, codepoint, byte))
                 {
                 case UTF8_ACCEPT:  // decode found a new code point
                 {
@@ -18547,7 +18547,7 @@ namespace detail
                     // write buffer and reset index; there must be 13 bytes
                     // left, as this is the maximal number of bytes to be
                     // written ("\uxxxx\uxxxx\0") for one code point
-                    if (string_buffer.size() - bytes < 13)
+                    if (string_buffer.Size() - bytes < 13)
                     {
                         o->write_characters(string_buffer.data(), bytes);
                         bytes = 0;
@@ -18606,7 +18606,7 @@ namespace detail
                             // write buffer and reset index; there must be 13 bytes
                             // left, as this is the maximal number of bytes to be
                             // written ("\uxxxx\uxxxx\0") for one code point
-                            if (string_buffer.size() - bytes < 13)
+                            if (string_buffer.Size() - bytes < 13)
                             {
                                 o->write_characters(string_buffer.data(), bytes);
                                 bytes = 0;
@@ -18618,7 +18618,7 @@ namespace detail
                         undumped_chars = 0;
 
                         // continue processing the string
-                        state = UTF8_ACCEPT;
+                        State = UTF8_ACCEPT;
                         break;
                     }
 
@@ -18642,7 +18642,7 @@ namespace detail
             }
 
             // we finished processing the string
-            if (JSON_HEDLEY_LIKELY(state == UTF8_ACCEPT))
+            if (JSON_HEDLEY_LIKELY(State == UTF8_ACCEPT))
             {
                 // write buffer
                 if (bytes > 0)
@@ -18813,7 +18813,7 @@ namespace detail
             }
 
             // spare 1 byte for '\0'
-            JSON_ASSERT(n_chars < number_buffer.size() - 1);
+            JSON_ASSERT(n_chars < number_buffer.Size() - 1);
 
             // jump to the end to generate the string from backward,
             // so we later avoid reversing the result
@@ -18875,7 +18875,7 @@ namespace detail
         void dump_float(number_float_t x, std::true_type /*is_ieee_single_or_double*/)
         {
             auto* begin = number_buffer.data();
-            auto* end = ::nlohmann::detail::to_chars(begin, begin + number_buffer.size(), x);
+            auto* end = ::nlohmann::detail::to_chars(begin, begin + number_buffer.Size(), x);
 
             o->write_characters(begin, static_cast<size_t>(end - begin));
         }
@@ -18887,12 +18887,12 @@ namespace detail
 
             // the actual conversion
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
-            std::ptrdiff_t len = (std::snprintf)(number_buffer.data(), number_buffer.size(), "%.*g", d, x);
+            std::ptrdiff_t len = (std::snprintf)(number_buffer.data(), number_buffer.Size(), "%.*g", d, x);
 
             // negative value indicates an error
             JSON_ASSERT(len > 0);
             // check if buffer was large enough
-            JSON_ASSERT(static_cast<std::size_t>(len) < number_buffer.size());
+            JSON_ASSERT(static_cast<std::size_t>(len) < number_buffer.Size());
 
             // erase thousands separator
             if (thousands_sep != '\0')
@@ -18952,7 +18952,7 @@ namespace detail
         @copyright Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
         @sa http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
         */
-        static std::uint8_t decode(std::uint8_t& state, std::uint32_t& codep, const std::uint8_t byte) noexcept
+        static std::uint8_t decode(std::uint8_t& State, std::uint32_t& codep, const std::uint8_t byte) noexcept
         {
             static const std::array<std::uint8_t, 400> utf8d =
             {
@@ -18974,17 +18974,17 @@ namespace detail
                 }
             };
 
-            JSON_ASSERT(byte < utf8d.size());
+            JSON_ASSERT(byte < utf8d.Size());
             const std::uint8_t type = utf8d[byte];
 
-            codep = (state != UTF8_ACCEPT)
+            codep = (State != UTF8_ACCEPT)
                 ? (byte & 0x3fu) | (codep << 6u)
                 : (0xFFu >> type) & (byte);
 
-            const std::size_t index = 256u + static_cast<size_t>(state) * 16u + static_cast<size_t>(type);
-            JSON_ASSERT(index < utf8d.size());
-            state = utf8d[index];
-            return state;
+            const std::size_t index = 256u + static_cast<size_t>(State) * 16u + static_cast<size_t>(type);
+            JSON_ASSERT(index < utf8d.Size());
+            State = utf8d[index];
+            return State;
         }
 
         /*
@@ -19298,7 +19298,7 @@ struct ordered_map : std::vector<std::pair<const Key, T>, Allocator>
         //             first    last
 
         // remove the unneeded elements at the end of the vector
-        Container::resize(this->size() - static_cast<size_type>(elements_affected));
+        Container::resize(this->Size() - static_cast<size_type>(elements_affected));
 
         // [ a, b, c, d, h, i, j ]
         //               ^        ^
@@ -19922,12 +19922,12 @@ JSON_PRIVATE_UNLESS_TESTED:
                 // move the top-level items to stack
                 if (t == value_t::array)
                 {
-                    stack.reserve(array->size());
+                    stack.reserve(array->Size());
                     std::move(array->begin(), array->end(), std::back_inserter(stack));
                 }
                 else
                 {
-                    stack.reserve(object->size());
+                    stack.reserve(object->Size());
                     for (auto&& it : *object)
                     {
                         stack.push_back(std::move(it.second));
@@ -20262,7 +20262,7 @@ public:
                 // The cast is to ensure op[size_type] is called, bearing in mind size_type may not be int;
                 // (many string types can be constructed from 0 via its null-pointer guise, so we get a
                 // broken call to op[key_type], the wrong semantics and a 4804 warning on Windows)
-                return element_ref->is_array() && element_ref->size() == 2 && (*element_ref)[static_cast<size_type>(0)].is_string();
+                return element_ref->is_array() && element_ref->Size() == 2 && (*element_ref)[static_cast<size_type>(0)].is_string();
             });
 
         // adjust type if type deduction is not wanted
@@ -21422,7 +21422,7 @@ public:
         if (JSON_HEDLEY_LIKELY(is_array()))
         {
             // fill up array with null values if given idx is outside range
-            if (idx >= m_data.m_value.array->size())
+            if (idx >= m_data.m_value.array->Size())
             {
 #if JSON_DIAGNOSTICS
                 // remember array size & capacity before resizing
@@ -21975,7 +21975,7 @@ public:
         // this erase only works for arrays
         if (JSON_HEDLEY_LIKELY(is_array()))
         {
-            if (JSON_HEDLEY_UNLIKELY(idx >= size()))
+            if (JSON_HEDLEY_UNLIKELY(idx >= Size()))
             {
                 JSON_THROW(out_of_range::create(401, detail::concat("array index ", std::to_string(idx), " is out of range"), this));
             }
@@ -22293,7 +22293,7 @@ public:
 
     /// @brief returns the number of elements
     /// @sa https://json.nlohmann.me/api/basic_json/size/
-    size_type size() const noexcept
+    size_type Size() const noexcept
     {
         switch (m_data.m_type)
         {
@@ -22306,13 +22306,13 @@ public:
         case value_t::array:
         {
             // delegate call to array_t::size()
-            return m_data.m_value.array->size();
+            return m_data.m_value.array->Size();
         }
 
         case value_t::object:
         {
             // delegate call to object_t::size()
-            return m_data.m_value.object->size();
+            return m_data.m_value.object->Size();
         }
 
         case value_t::string:
@@ -22359,7 +22359,7 @@ public:
         default:
         {
             // all other types have max_size() == size()
-            return size();
+            return Size();
         }
         }
     }
@@ -22534,7 +22534,7 @@ public:
     /// @sa https://json.nlohmann.me/api/basic_json/push_back/
     void push_back(initializer_list_t init)
     {
-        if (is_object() && init.size() == 2 && (*init.begin())->is_string())
+        if (is_object() && init.Size() == 2 && (*init.begin())->is_string())
         {
             basic_json&& key = init.begin()->moved_or_copied();
             push_back(typename object_t::value_type(
@@ -24126,7 +24126,7 @@ public:
                     else
                     {
                         const auto idx = json_pointer::template array_index<basic_json_t>(last_path);
-                        if (JSON_HEDLEY_UNLIKELY(idx > parent.size()))
+                        if (JSON_HEDLEY_UNLIKELY(idx > parent.Size()))
                         {
                             // avoid undefined behavior
                             JSON_THROW(out_of_range::create(401, detail::concat("array index ", std::to_string(idx), " is out of range"), &parent));
@@ -24226,8 +24226,8 @@ public:
 
             // collect mandatory members
             const auto op = get_value("op", "op", true).template get<std::string>();
-            const auto path = get_value(op, "path", true).template get<std::string>();
-            json_pointer ptr(path);
+            const auto FullPath = get_value(op, "path", true).template get<std::string>();
+            json_pointer ptr(FullPath);
 
             switch (get_op(op))
             {
@@ -24329,7 +24329,7 @@ public:
     /// @sa https://json.nlohmann.me/api/basic_json/diff/
     JSON_HEDLEY_WARN_UNUSED_RESULT
         static basic_json diff(const basic_json& source, const basic_json& target,
-            const std::string& path = "")
+            const std::string& FullPath = "")
     {
         // the patch
         basic_json result(value_t::array);
@@ -24345,7 +24345,7 @@ public:
             // different types: replace value
             result.push_back(
                 {
-                    {"op", "replace"}, {"path", path}, {"value", target}
+                    {"op", "replace"}, {"path", FullPath}, {"value", target}
                 });
             return result;
         }
@@ -24356,10 +24356,10 @@ public:
         {
             // first pass: traverse common elements
             std::size_t i = 0;
-            while (i < source.size() && i < target.size())
+            while (i < source.Size() && i < target.Size())
             {
                 // recursive call to compare array values at index i
-                auto temp_diff = diff(source[i], target[i], detail::concat(path, '/', std::to_string(i)));
+                auto temp_diff = diff(source[i], target[i], detail::concat(FullPath, '/', std::to_string(i)));
                 result.insert(result.end(), temp_diff.begin(), temp_diff.end());
                 ++i;
             }
@@ -24368,26 +24368,26 @@ public:
             // in a second pass, traverse the remaining elements
 
             // remove my remaining elements
-            const auto end_index = static_cast<difference_type>(result.size());
-            while (i < source.size())
+            const auto end_index = static_cast<difference_type>(result.Size());
+            while (i < source.Size())
             {
                 // add operations in reverse order to avoid invalid
                 // indices
                 result.insert(result.begin() + end_index, object(
                     {
                         {"op", "remove"},
-                        {"path", detail::concat(path, '/', std::to_string(i))}
+                        {"path", detail::concat(FullPath, '/', std::to_string(i))}
                     }));
                 ++i;
             }
 
             // add other remaining elements
-            while (i < target.size())
+            while (i < target.Size())
             {
                 result.push_back(
                     {
                         {"op", "add"},
-                        {"path", detail::concat(path, "/-")},
+                        {"path", detail::concat(FullPath, "/-")},
                         {"value", target[i]}
                     });
                 ++i;
@@ -24402,7 +24402,7 @@ public:
             for (auto it = source.cbegin(); it != source.cend(); ++it)
             {
                 // escape the key name to be used in a JSON patch
-                const auto path_key = detail::concat(path, '/', detail::escape(it.key()));
+                const auto path_key = detail::concat(FullPath, '/', detail::escape(it.key()));
 
                 if (target.find(it.key()) != target.end())
                 {
@@ -24426,7 +24426,7 @@ public:
                 if (source.find(it.key()) == source.end())
                 {
                     // found a key that is not in this -> add it
-                    const auto path_key = detail::concat(path, '/', detail::escape(it.key()));
+                    const auto path_key = detail::concat(FullPath, '/', detail::escape(it.key()));
                     result.push_back(
                         {
                             {"op", "add"}, {"path", path_key},
@@ -24451,7 +24451,7 @@ public:
             // both primitive type: replace value
             result.push_back(
                 {
-                    {"op", "replace"}, {"path", path}, {"value", target}
+                    {"op", "replace"}, {"path", FullPath}, {"value", target}
                 });
             break;
         }

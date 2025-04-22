@@ -1,8 +1,12 @@
 #pragma once
 
-#include "pch.h"
+#include "../../pch.h"
 
 #define CALLBACK_TYPE void()
+
+enum class eSection {
+
+};
 
 class IntegrityChecker {
 private:
