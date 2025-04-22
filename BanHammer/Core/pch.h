@@ -9,5 +9,8 @@
 //#include <nmmintrin.h>
 #include <intrin.h>
 #include <iostream>
+#include <cstdint>
+#include <random>
+#include <utility>
 
 #include <spdlog/spdlog.h>
