@@ -1,6 +1,10 @@
 # BanHammer
 
-The rise of cheating in the gaming industry is hurting both players and developers—especially smaller studios that can’t afford expensive anti-cheat solutions. Seeing my favorite childhood games lose their reputation to cheaters inspired me to create this open-source project.  
+The rise of cheating in the gaming industry is hurting both players and developers — especially smaller studios that can’t afford expensive anti-cheat solutions. Seeing my favorite childhood games lose their reputation to cheaters inspired me to create this open-source project for educational purposes first.  
+
+### Architecture
+
+This still isnt 100% thought through but my idea is to show 
 
 ### **WIP/Testing**  
 - **Kernel-level detection**
@@ -19,7 +23,7 @@ The rise of cheating in the gaming industry is hurting both players and develope
 - **Internal cheat detection**
   - Scan for non signed dll
   - Integrity check for provided module and section
-  - New thread creation via TLS callbacks
+  - New thread creation dettection via TLS callbacks
   - IAT hook check
 
 This is just the beginning — I plan to expand features gradually with community support. If you're a developer, contributor, or just passionate about fair play, let’s work together!  
@@ -39,12 +43,6 @@ This is just the beginning — I plan to expand features gradually with communit
   - pool tag (to identify driver objects?) and system thread scanning, the ones that do not belong to drivers that are in PsLoadedModuleList must be from manually mapped drivers!
   - `.data` pointer hook checks. See if a particular pointer that we are using is pointing to a memory region outside valid (signed) modules.
     - blacklist some pointers?
-
-- **Aditional Security Thoughts**
-  - use lazy import library
-  - rtti obfuscation
-  - make string encryption library for kenrel and usermode
-  - runtime pointer/function encryption/decryption
 
 ---
 
