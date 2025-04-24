@@ -1,10 +1,10 @@
 # BanHammer
 
-The rise of cheating in the gaming industry is hurting both players and developers — especially smaller studios that can’t afford expensive anti-cheat solutions. Seeing my favorite childhood games lose their reputation to cheaters inspired me to create this open-source project for educational purposes first.  
+The rise of cheating in the gaming industry is hurting both players and developers — especially smaller studios that can’t afford expensive anti-cheat solutions. Seeing my favorite childhood games lose their reputation to cheaters inspired me to create this open-source project.  
 
 ### Architecture
 
-This still isnt 100% thought through but my idea is to show 
+The first version of BanHammer will be minimalistic and will consist of minimal launcher + core engine + minimal driver.
 
 ### **WIP/Testing**  
 - **Kernel-level detection**
